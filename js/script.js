@@ -5,6 +5,8 @@ const username = "Alacher2";
 const repoList = document.querySelector(".repo-list");
 const myRepos = document.querySelector(".repos");
 const myRepoInfo = document.querySelector(".repo-data");
+const backButton = document.querySelector(".view-repos");
+const filterInput = document.querySelector(".filter-repos");
 
 const getUserData = async function () {
   const userData = await fetch(`https://api.github.com/users/${username}`);
@@ -29,16 +31,17 @@ const displayUserData = function (data) {
     </div>
     `;
     overview.append(div);
-    userRepos();
+    userRepos(username);
 };
 
-const userRepos = async function () {
+const userRepos = async function (username) {
   const getRepos = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
   const repoData = await getRepos.json();
   displayRepos(repoData);
 }
 
 const displayRepos = function (repos) {
+  filterInput.classList.remove("hide");
   for (const repo of repos) {
     const repoItem = document.createElement("li");
     repoItem.classList.add("repo");
@@ -75,6 +78,7 @@ const displayRepoInfo = function (repoInfo, languages) {
   myRepoInfo.innerHTML = "";
   myRepoInfo.classList.remove("hide");
   myRepos.classList.add("hide");
+  backButton.classList.remove("hide");
   const div = document.createElement("div");
   div.innerHTML = `
     <h3>Name: ${repoInfo.name}</h3>
@@ -85,3 +89,24 @@ const displayRepoInfo = function (repoInfo, languages) {
       `;
       myRepoInfo.append(div);
 };
+
+backButton.addEventListener("click", function () {
+  myRepos.classList.remove("hide");
+  myRepoInfo.classList.add("hide");
+  backButton.classList.add("hide");
+})
+
+filterInput.addEventListener("input", function (e) {
+  const searchText = e.target.value;
+  const repos = document.querySelector(".repo");
+  const searchLowerCase = searchText.toLowerCase(); 
+
+  for (const repo of repos) {
+    const repoLowerCase = repo.innerText.toLowerCase();
+    if (repoLowerCase.include(searchLowerCase)) {
+      repo.classList.remove("hide");
+    } else {
+      repo.classList.add("hide");
+    }
+  }
+});
